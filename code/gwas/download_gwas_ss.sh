@@ -38,21 +38,25 @@ urls=(
     "https://storage.googleapis.com/finngen-public-data-r6/summary_stats/finngen_R6_ATOPIC_STRICT.gz"
 )
 
+data_dir="data/gwas_ss"
+output_dir="output/gwas_ss_filt"
+
 # Add corresponding output files here
-output_files=("data/ra_uk_bb.h.tsv"
-              "data/t1d_uk_bb.h.tsv"
-              "data/hypo_uk_bb.h.tsv"
-              "data/endo_uk_bb.h.tsv"
-              "data/ovary_cys_uk_bb.h.tsv"
-              "data/menorrhagia_uk_bb.h.tsv"
-              "data/age_meno_uk_bb.h.tsv"
-              "data/finngen_atopic_derm"
+output_files=(
+              "$data_dir/ra_uk_bb.h.tsv"
+              "$data_dir/t1d_uk_bb.h.tsv"
+              "$data_dir/hypo_uk_bb.h.tsv"
+              "$data_dir/endo_uk_bb.h.tsv"
+              "$data_dir/ovary_cys_uk_bb.h.tsv"
+              "$data_dir/menorrhagia_uk_bb.h.tsv"
+              "$data_dir/age_meno_uk_bb.h.tsv"
+              "$data_dir/finngen_atopic_derm"
               )
 
 
  # Add corresponding disease names here                  
 disease_names=(
-  "Rheumatoid Arthritis"
+              "Rheumatoid Arthritis"
               "Type 1 Diabetes"
               "Hypothyroidism"
               "Endometriosis"
@@ -69,49 +73,60 @@ for i in "${!urls[@]}"; do
     disease_name="${disease_names[$i]}"
 
     # Download and unzip the data
+    echo " "
+    echo " "
     echo "Downloading data for ${disease_name}..."
-    wget -O "${output_file}.gz" "$url"
-    gunzip "${output_file}.gz"
+    wget -nc -O "${output_file}.gz" "$url"
+    
+    if [ ! -f "$output_file" ]; then
+       gunzip "${output_file}.gz"
+    fi
+    
+    filt_file="$(echo "$output_file" | sed "s|^$data_dir|$output_dir|" | sed 's|\.tsv$|.filt.tsv|')"
+    
+    if [[ "$output_file" == *"finngen"* ]]; then
+       filt_file="$filt_file.filt.tsv"
+    fi
+    
+    echo " "
+    echo "Downloaded file saved as $output_file"
+    echo "Filtered file saved as $filt_file"
+    echo " "
     
     if [[ "$output_file" == *"uk"* ]]; then
         if [[ "$output_file" == *"age_meno"* ]]; then #menopause files have a different file structure
-            awk -F'\t' '$1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "${output_file%.tsv}.filt.tsv"
+            awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
         else 
         # Filtering and counting based on chromosome and position for "ukbb" files
-            awk -F'\t' '$3 == 6 || $3 == 4 || $3 == 11' "$output_file" > "${output_file%.tsv}.filt.tsv"
+            awk -F'\t' 'NR == 1 || $3 == 6 || $3 == 4 || $3 == 11' "$output_file" > "$filt_file"
             
         fi
         
-        output_file="${output_file%.tsv}.filt.tsv"
-        
         # Print statistics
         echo "${disease_name} number of sites tested for chromosome 6"
-        awk -F'\t' '$3 == 6' "$output_file" | wc -l
+        awk -F'\t' 'NR == 1 || $3 == 6' "$filt_file" | wc -l
 
         echo "${disease_name} number of sites for chromosome 4"
-        awk -F'\t' '$3 == 4' "$output_file" | wc -l
+        awk -F'\t' 'NR == 1 || $3 == 4' "$filt_file" | wc -l
 
         echo "${disease_name} number of sites for chromosome 11"
-        awk -F'\t' '$3 == 11' "$output_file" | wc -l
+        awk -F'\t' 'NR == 1 || $3 == 11' "$filt_file" | wc -l
         
     elif [[ "$output_file" == *"finngen"* ]]; then
     
         # Filtering and counting based on chromosome and position for "finngen" files
-        awk -F'\t' '$1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "${output_file}.filt.tsv"
-        output_file="${output_file}.filt.tsv"
+        awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
         
         # Print statistics
         echo "${disease_name} number of sites tested for chromosome 6"
-        awk -F'\t' '$1 == 6' "$output_file" | wc -l
+        awk -F'\t' 'NR == 1 || $1 == 6' "$filt_file" | wc -l
 
         echo "${disease_name} number of sites for chromosome 4"
-        awk -F'\t' '$1 == 4' "$output_file" | wc -l
+        awk -F'\t' 'NR == 1 || $1 == 4' "$filt_file" | wc -l
 
         echo "${disease_name} number of sites for chromosome 11"
-        awk -F'\t' '$1 == 11' "$output_file" | wc -l
+        awk -F'\t' 'NR == 1 || $1 == 11' "$filt_file" | wc -l
     fi  
-
-
 
     echo "Processing complete for ${disease_name}."
 done
