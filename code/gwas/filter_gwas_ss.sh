@@ -70,7 +70,7 @@ for i in "${!fig_4c_data[@]}"; do
     echo " "
     echo "$gwas_sum_stat"
     
-    if [[ "$gwas_sum_stat" == *"meno"* ]]; then #menopause files have a different file structure
+    if [[ "$gwas_sum_stat" == *"age_meno"* ]]; then #menopause files have a different file structure
         
         awk -F'\t' '$1 == 11 && $2 >= 21298378 && $2 <= 27698378' "$gwas_sum_stat" >  "${gwas_sum_stat%.tsv}.fig4c.tsv"
     else 

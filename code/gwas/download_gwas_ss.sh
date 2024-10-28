@@ -35,7 +35,7 @@ urls=(
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077793/harmonised/34662886-GCST90077793-HP_0000138.h.tsv.gz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
-     "https://storage.googleapis.com/finngen-public-data-r6/summary_stats/finngen_R6_ATOPIC_STRICT.gz"
+    "https://storage.googleapis.com/finngen-public-data-r6/summary_stats/finngen_R6_ATOPIC_STRICT.gz"
 )
 
 # Add corresponding output files here
@@ -74,7 +74,7 @@ for i in "${!urls[@]}"; do
     gunzip "${output_file}.gz"
     
     if [[ "$output_file" == *"uk"* ]]; then
-        if [[ "$output_file" == *"meno"* ]]; then #menopause files have a different file structure
+        if [[ "$output_file" == *"age_meno"* ]]; then #menopause files have a different file structure
             awk -F'\t' '$1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "${output_file%.tsv}.filt.tsv"
         else 
         # Filtering and counting based on chromosome and position for "ukbb" files
