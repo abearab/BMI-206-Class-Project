@@ -62,8 +62,8 @@ print(head(data))
 
 data = data |> # base regions
   dplyr::mutate(pos = pos / 10^6) |> 
-  dplyr::filter(pos >= plot_region_left - 1 & 
-                pos <= plot_region_right + 1) # convert to mB - and filter proper figure region
+  dplyr::filter(pos >= plot_region_left - 0 & 
+                pos <= plot_region_right + 0) # convert to mB - and filter proper figure region
 
 #print(head(data))
 
@@ -81,7 +81,7 @@ return(data)
 }
 
 
-plot_gg_manhattan = function(data){
+plot_gg_manhattan = function(data, data_filename){
   
   message("\n Make ggplot for ", data_filename)
   
@@ -91,7 +91,9 @@ plot_gg_manhattan = function(data){
     theme_bw() +
     theme(
       panel.grid.major = element_blank(),  # Remove major grid lines
-      panel.grid.minor = element_blank()   # Remove minor grid lines
+      panel.grid.minor = element_blank(),   # Remove minor grid lines
+      axis.text.x = element_text(size = 7),
+      axis.text.y = element_text(size = 7)
     ) + 
     labs(x = "Position (chr 6, Mb)", 
          y = expression(-log[10](P[GWAS])) 
@@ -100,7 +102,7 @@ plot_gg_manhattan = function(data){
   
   
   plotfile = stringr::str_replace(data_filename,
-                                  pattern = ".filt.tsv",
+                                  pattern = ".tsv",
                                   replacement = ".png")
   
   plotfile = stringr::str_replace(plotfile,
@@ -111,17 +113,20 @@ plot_gg_manhattan = function(data){
   message("\n Saving plot as ", plotfile, "\n \n \n")
   
   
-  suppressMessages(ggsave(plotfile))
+  suppressMessages(ggsave(plotfile,
+                          width = 20,
+                          height = 4,
+                          units = "cm"))
 }
 
 ################ Figure 4a. ############# 
+{
 
-
-fig_4a_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.tsv",
-             "output/gwas_ss_filt/t1d_uk_bb.h.filt.tsv",
-              "output/gwas_ss_filt/hypo_uk_bb.h.filt.tsv",
-             "output/gwas_ss_filt/finngen_atopic_derm.filt.tsv"
-           )
+fig_4a_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv",
+             "output/gwas_ss_filt/t1d_uk_bb.h.filt.fig4a.tsv",
+              "output/gwas_ss_filt/hypo_uk_bb.h.filt.fig4a.tsv",
+             "output/gwas_ss_filt/finngen_atopic_derm.filt.fig4a.tsv"
+             )
 
 #fig_4a_data = "output/gwas_ss_filt/finngen_atopic_derm.filt.tsv"
 # type 1 diabetes is looking correct 
@@ -135,15 +140,18 @@ for(data_filename in fig_4a_data){
                         plot_region_right = 90.4)
   
   
-  plot_gg_manhattan(data)
+  plot_gg_manhattan(data, data_filename)
 
 } 
 
+}
 
 ################# Figure 4b. ###################### 
 
-fig_4b_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.tsv",
-             "output/gwas_ss_filt/t1d_uk_bb.h.filt.tsv"
+{
+  
+fig_4b_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.fig4b.tsv",
+             "output/gwas_ss_filt/t1d_uk_bb.h.filt.fig4b.tsv"
 )
 
 for(data_filename in fig_4b_data){
@@ -154,18 +162,21 @@ for(data_filename in fig_4b_data){
                         plot_region_right = 26.20)
   
   
-  plot_gg_manhattan(data)
+  plot_gg_manhattan(data, data_filename)
   
 } 
+
+}
 
 
 ########### Figure 4c. ############ 
 
+{
 
-fig_4c_data=c("output/gwas_ss_filt/endo_uk_bb.h.filt.tsv",
-             "output/gwas_ss_filt/ovary_cys_uk_bb.h.filt.tsv",
-             "output/gwas_ss_filt/menorrhagia_uk_bb.h.filt.tsv",
-             "output/gwas_ss_filt/age_meno_uk_bb.h.filt.tsv"
+fig_4c_data=c("output/gwas_ss_filt/endo_uk_bb.h.filt.fig4c.tsv",
+             "output/gwas_ss_filt/ovary_cys_uk_bb.h.filt.fig4c.tsv",
+             "output/gwas_ss_filt/menorrhagia_uk_bb.h.filt.fig4c.tsv",
+             "output/gwas_ss_filt/age_meno_uk_bb.h.filt.fig4c.tsv"
 )
 
 for(data_filename in fig_4c_data){
@@ -176,6 +187,8 @@ for(data_filename in fig_4c_data){
                         plot_region_right = 30.4)
   
   
-  plot_gg_manhattan(data)
+  plot_gg_manhattan(data, data_filename)
   
 } 
+
+}
