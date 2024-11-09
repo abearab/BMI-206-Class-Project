@@ -1,16 +1,20 @@
 # filter gwas data to genomic regions shown in figure 
 
 
+##################### Figure 4a. ################# 
+
 # 6q15
 # 93100001-99500000 hg19 ucsc browser
 # 92390283-99052124 liftover from hg19 to hg38
 # in hg38 88000001-93100000 ucsc browser
 
-fig_4a_data=("output/gwas_ss/ra_uk_bb.h.filt.tsv"
-               "data/t1d_uk_bb.h.filt.tsv"
-               "data/hypo_uk_bb.h.filt.tsv"
-               "data/finngen_atopic_derm.filt.tsv"
-              )
+output_dir="output/gwas_ss_filt"
+
+fig_4a_data=("$output_dir/ra_uk_bb.h.filt.tsv"
+             "$output_dir/t1d_uk_bb.h.filt.tsv"
+              "$output_dir/hypo_uk_bb.h.filt.tsv"
+              "$output_dir/finngen_atopic_derm.filt.tsv"
+             )
               
 echo "Filtering Figure 4a datasets"
 for i in "${!fig_4a_data[@]}"; do
@@ -30,6 +34,10 @@ for i in "${!fig_4a_data[@]}"; do
     fi
 done 
 
+
+
+
+######################## Figure 4 b. ####################### 
 # 4p15.2
 
 # 21300001-27700000 hg19
@@ -38,8 +46,9 @@ echo " "
 echo " "
 echo "Filtering Figure 4b datasets"
 
-fig_4b_data=("data/ra_uk_bb.h.filt.tsv"
-             "data/t1d_uk_bb.h.filt.tsv")
+fig_4b_data=("$output_dir/ra_uk_bb.h.filt.tsv"
+             "$output_dir/t1d_uk_bb.h.filt.tsv"
+             )
              
 for i in "${!fig_4b_data[@]}"; do
     gwas_sum_stat="${fig_4b_data[$i]}"
@@ -51,13 +60,14 @@ for i in "${!fig_4b_data[@]}"; do
     
 done 
 
+##################### Figure 4c ######################### 
 # 11p14.1
 # hg38 liftover 27178454-30978453
 # hg19 27200001-31000000
-fig_4c_data=("data/endo_uk_bb.h.filt.tsv"
-             "data/ovary_cys_uk_bb.h.filt.tsv"
-             "data/menorrhagia_uk_bb.h.filt.tsv"
-             "data/age_meno_uk_bb.h.filt.tsv"
+fig_4c_data=("$output_dir/endo_uk_bb.h.filt.tsv"
+             "$output_dir/ovary_cys_uk_bb.h.filt.tsv"
+             "$output_dir/menorrhagia_uk_bb.h.filt.tsv"
+             "$output_dir/age_meno_uk_bb.h.filt.tsv"
              )
 
 echo " "
