@@ -52,11 +52,9 @@ po/*~
 rsconnect/
 
 # data files
-data/*
 output/*
 *.vcf
 *.bcf
-# *.gz
 *.samples
 *.tsv
 .DS_Store
