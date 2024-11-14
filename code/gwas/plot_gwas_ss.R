@@ -1,13 +1,18 @@
 
-
+{
 library(ggplot2)
 library(dplyr)
+library(LDlinkR)
+library(purrr)
+}
 
-
+# making plot data takes ~5 - 10 mins 
+# due to LD labeling 
 make_plot_data = function(data_filename, 
                           plot_chrom, 
                           plot_region_left, 
-                         plot_region_right){
+                         plot_region_right, 
+                         top_rsid = "unlabelled"){
   
 
 message("\n Making data for ", data_filename)
@@ -58,7 +63,6 @@ data = data |>
 data = data |> 
   dplyr::filter(chrom == plot_chrom) #  #chromosomal region
 
-print(head(data))
 
 data = data |> # base regions
   dplyr::mutate(pos = pos / 10^6) |> 
@@ -73,20 +77,135 @@ data = data |>
 
 data = data |> 
        dplyr::mutate(log_pval = -1*log(pval, base = 10)) 
+# 
+# data = data |>
+#        dplyr::slice_head(n = 1200)
 
-#print(head(data))
+print(head(data))
+
+# get relevant LD info
+
+if(top_rsid != "unlabelled"){
+
+message("Getting LD data for ", top_rsid)
+
+top_snp_pos = data |> 
+              dplyr::filter(rsid == top_rsid) |> 
+              dplyr::pull("pos")
+
+win_size = max(abs(plot_region_right - top_snp_pos),
+               abs(plot_region_left  - top_snp_pos))
+
+high_ld = suppressMessages(
+                           LDlinkR::LDproxy(snp = top_rsid, 
+                           pop = "EUR", 
+                           r2d = "r2", 
+                           genome_build = "grch37",
+                           win_size = win_size*10^6,
+                           token = Sys.getenv("LDLINK_TOKEN")
+                           )
+                           )
+
+high_ld = high_ld |> 
+          dplyr::select(RS_Number, R2) |> 
+          dplyr::rename(rsid = RS_Number)
+
+low_ld = setdiff(data$rsid, high_ld$rsid) |> 
+         unique()
+
+# filtering out non labelled rsids
+low_ld = low_ld[low_ld != " . "]
+low_ld = low_ld[!grepl(pattern = "\\.", low_ld)]
+low_ld = low_ld[grepl(pattern = "rs", low_ld)]
+
+
+low_ld_split <- split(low_ld, 
+                ceiling(seq_along(low_ld) / 1000)
+)
+
+low_ld_mat <- purrr::map_dfr(low_ld_split, function(chunk) {
+   mat = suppressMessages(LDlinkR::LDmatrix(
+    snps = c(chunk, top_rsid),
+    pop = "EUR",
+    r2d = "r2",
+    genome_build = "grch37",
+    token = Sys.getenv("LDLINK_TOKEN")
+  )[,c("RS_number",  top_rsid)])
+},
+.progress = T
+) 
+            
+                       low_ld = low_ld_mat |>         
+          dplyr::rename(rsid = RS_number,
+                        R2  = !!top_rsid)
+
+all_ld = dplyr::bind_rows(high_ld, low_ld) |>
+         distinct()
+
+
+
+# low_ld <- split(low_ld, 
+#                 cut(seq_along(low_ld), 
+#                 4, labels = FALSE)
+#                 )
+# 
+# safe_LDpair <- purrr::possibly(function(snp) {
+# 
+# 
+#   suppressMessages(
+#                    LDpair(top_rsid,
+#                    snp,
+#                   pop = "EUR",
+#                    token = Sys.getenv("LDLINK_TOKEN"),
+#                                                      genome_build = "grch38" )
+#                   )[, "r2"] },
+#                                otherwise = NA)
+
+# tic("LDpair")
+# 
+# # low_ld_snps = low_ld
+# # 
+# # low_ld <- purrr:::map_vec(low_ld_snps,
+# #                       safe_LDpair,
+# #                       .progress = T)
+# # 
+# # low_ld = data.frame(rsid = low_ld_snps,
+# #                     R2 = low_ld)
+# 
+# toc()
+# stop()
+
+head(data)
+head(all_ld)
+
+data = dplyr::left_join(data,
+                 all_ld,
+                 by = "rsid")
+      
+
+}
+
+print(head(data))
 
 return(data)
 
 }
 
-
-plot_gg_manhattan = function(data, data_filename){
+ 
+plot_gg_manhattan = function(data, 
+                             data_filename, 
+                             top_rsid = "unlabelled"){
   
   message("\n Make ggplot for ", data_filename)
   
+  if(top_rsid != "unlabelled"){
+
   data |>
-    ggplot(aes(x=pos, y = log_pval)) +
+    ggplot(aes(x=pos, 
+               y = log_pval, 
+               #fill = R2, 
+               color = R2
+               )) +
     geom_point(size = 0.5, alpha = 1) +
     theme_bw() +
     theme(
@@ -97,8 +216,28 @@ plot_gg_manhattan = function(data, data_filename){
     ) + 
     labs(x = "Position (chr 6, Mb)", 
          y = expression(-log[10](P[GWAS])) 
-    )
+    ) + 
+    scale_colour_fermenter(name = expression(LD~(r^2)), palette = "YlGnBu") # +
+    #scale_fill_fermenter(name = expression(LD~(r^2)), palette = "YlGnBu")
          #y = expression(paste0("-log_10(P_GWAS)")
+    
+  } else {
+    
+    data |>
+      ggplot(aes(x=pos, y = log_pval)) +
+      geom_point(size = 0.5, alpha = 1) +
+      theme_bw() +
+      theme(
+        panel.grid.major = element_blank(),  # Remove major grid lines
+        panel.grid.minor = element_blank(),   # Remove minor grid lines
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7)
+      ) + 
+      labs(x = "Position (chr 6, Mb)", 
+           y = expression(-log[10](P[GWAS])) 
+      )
+     
+  }
   
   
   plotfile = stringr::str_replace(data_filename,
@@ -122,9 +261,9 @@ plot_gg_manhattan = function(data, data_filename){
 ################ Figure 4a. ############# 
 {
 
-fig_4a_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv",
+fig_4a_data=c(#"output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv",
              "output/gwas_ss_filt/t1d_uk_bb.h.filt.fig4a.tsv",
-              "output/gwas_ss_filt/hypo_uk_bb.h.filt.fig4a.tsv",
+              #"output/gwas_ss_filt/hypo_uk_bb.h.filt.fig4a.tsv",
              "output/gwas_ss_filt/finngen_atopic_derm.filt.fig4a.tsv"
              )
 
@@ -133,14 +272,20 @@ fig_4a_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv",
 
 
 for(data_filename in fig_4a_data){
+  
+  top_rsid = "rs72928038"
+  #top_rsid = "rs181077215" # test snp
 
   data = make_plot_data(data_filename = data_filename,
                         plot_chrom = 6,
                         plot_region_left = 90.1,
-                        plot_region_right = 90.4)
+                        plot_region_right = 90.4,
+                       top_rsid = top_rsid
+                        )
   
-  
-  plot_gg_manhattan(data, data_filename)
+  plot_gg_manhattan(data, 
+                    data_filename = data_filename, 
+                    top_rsid = top_rsid)
 
 } 
 
@@ -156,13 +301,19 @@ fig_4b_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.fig4b.tsv",
 
 for(data_filename in fig_4b_data){
   
+  
+  top_rsid = "rs35944082"
+  
   data = make_plot_data(data_filename = data_filename,
                         plot_chrom = 4,
                         plot_region_left = 26,
-                        plot_region_right = 26.20)
+                        plot_region_right = 26.20,
+                        top_rsid = top_rsid)
   
   
-  plot_gg_manhattan(data, data_filename)
+  plot_gg_manhattan(data, 
+                    data_filename = data_filename,
+                    top_rsid = top_rsid)
   
 } 
 
@@ -181,13 +332,18 @@ fig_4c_data=c("output/gwas_ss_filt/endo_uk_bb.h.filt.fig4c.tsv",
 
 for(data_filename in fig_4c_data){
   
+  top_rsid = "rs11031006"
+  
   data = make_plot_data(data_filename = data_filename,
                         plot_chrom = 11,
                         plot_region_left = 29.9,
-                        plot_region_right = 30.4)
+                        plot_region_right = 30.4,
+                        top_rsid = top_rsid)
   
   
-  plot_gg_manhattan(data, data_filename)
+  plot_gg_manhattan(data, 
+                    data_filename = data_filename,
+                    top_rsid = top_rsid)
   
 } 
 
