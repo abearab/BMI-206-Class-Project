@@ -16,3 +16,12 @@ dependencies:
   - conda-forge::r-r.utils
   - conda-forge::r-stringr
   - conda-forge::r-tidyverse
+  - conda-forge::r-seurat
+  - bioconda::bioconductor-singlecellexperiment
+  - bioconda::r-anndata
+  - conda-forge::scanpy
+  - conda-forge::ipykernel
+  - pip
+  - pip:
+    - venn
+    - rpy2
