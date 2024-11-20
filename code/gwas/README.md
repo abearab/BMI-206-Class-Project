@@ -1,35 +1,46 @@
 
 
-## Steps in GWAS data processing
+## Steps in GWAS data processing for Manhattan Plots 
 
 
-1. *download_gwas_ss.sh*
+<h2> 1. *download_gwas_ss.sh* </h2>
 
 Download, and initial chromosome-wide filtering for GWAS full summary statistics. 
 
 Output: 
-
 - data/gwas_ss/* (full summary statistics files)
 - output/gwas_ss_filt/* (summary statistics filtered for all variants on chromosome 4,6 & 11)
 
-2. *filter_gwas_ss.sg*
+<h2> 2. *filter_gwas_ss.sg* </h2>
 
-Filtering of GWAS summary statistics for plotting the full GWAS summary statistics. 
+Further filter the full GWAS summary statistics for the specific regions that are plotted in the Manhattan plots. 
+
+Input:
+- output/gwas_ss_filt/*
 
 Output: 
 - output/gwas_ss_filt/* (edited; summary statistics filtered for just the regions and columns needed for plotting)
 
+<h2> 3. *make_data_man_plot.sh* (calls *make_data_man_plot.R*) </h2>
 
-3. *plot_gwas_ss.R*
+Reform the filtered GWAS summary statistics, and integrate them with LD information (from 1000 genomes).
+This creates the data.frame that can then directly be plotted. 
 
-Create manhattan plots using the filtered summary statistics produced in step 2. 
+Input:
+- output/gwas_ss_filt/*
+
+Output: 
+- output/gwas_plotting_data/*
 
 
-4. *download_finemap.sh* 
+<h2> 4. *plot_gwas_ss.R* </h2>
 
+Create Manhattan plots using the datasets created in prior step. 
 
-5. *filter_finemap.sh* 
+Input:
+- output/gwas_plotting_data/*
 
-
+Output: 
+- figures/*
 
 
