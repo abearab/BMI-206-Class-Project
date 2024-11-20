@@ -18,6 +18,7 @@ dependencies:
   - conda-forge::r-tidyverse
   - conda-forge::r-seurat
   - bioconda::bioconductor-singlecellexperiment
+  - bioconda::bioconductor-rsamtools
   - bioconda::r-anndata
   - conda-forge::scanpy
   - conda-forge::ipykernel
