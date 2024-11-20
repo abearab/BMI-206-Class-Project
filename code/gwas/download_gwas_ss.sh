@@ -34,7 +34,8 @@ urls=(
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077821/harmonised/34662886-GCST90077821-EFO_0001065.h.tsv.gz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077793/harmonised/34662886-GCST90077793-HP_0000138.h.tsv.gz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/3581_irnt.gwas.imputed_v3.both_sexes.tsv.bgz"
     "https://storage.googleapis.com/finngen-public-data-r6/summary_stats/finngen_R6_ATOPIC_STRICT.gz"
 )
 
@@ -61,7 +62,7 @@ disease_names=(
               "Hypothyroidism"
               "Endometriosis"
               "Ovary Cysts"
-              "Menorrhagi"
+              "Menorrhagia"
               "Age of Menopause"
               "Atopic Dermatitis"
               ) 
