@@ -1,10 +1,12 @@
 
-module load CBI
-module load miniforge3/24.7.1-0
-module load R/4.4.2
-conda activate bmi-206-group
-#conda install conda-forge::gsutil
+# module load CBI
+# module load miniforge3/24.7.1-0
+# module load R/4.4.2
+# conda activate bmi-206-group
+# #conda install conda-forge::gsutil
 
+
+mkdir -p output/fine_map
 
 ########### Part 1: Determine: what finngen files to dowload ##################
 
@@ -24,7 +26,7 @@ gsutil cp gs://finngen-public-data-r6/summary_stats/R6_manifest.tsv "data/fine_m
         
   
 # we overlap them while doing filtering step 1: filter for traits with cases > 1,000         
-RScript -e '
+Rscript -e '
 
 R6_all = data.table::fread("data/fine_map/R6_manifest.tsv");
 
@@ -105,7 +107,7 @@ for file in data/fine_map/*.pip0.5.nonsyn; do
   line_count=$(wc -l < "$file")
   
   if [ "$line_count" -gt 1 ]; then
-      cat "$file" >> "$output"
-      echo "" >> "$output"  # Add a newline after each file for separation
+      cat "$file" >> "$output_file"
+      echo "" >> "$output_file"  # Add a newline after each file for separation
   fi
 done
