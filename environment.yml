@@ -1,4 +1,4 @@
-name: SCENT
+name: bmi-206-group
 channels:
   - bioconda
   - conda-forge
@@ -21,6 +21,7 @@ dependencies:
   - bioconda::bioconductor-rsamtools
   - bioconda::r-anndata
   - conda-forge::scanpy
+  - conda-forge::gsutil
   - conda-forge::ipykernel
   - pip
   - pip:
