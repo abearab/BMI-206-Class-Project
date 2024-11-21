@@ -5,6 +5,7 @@ channels:
 dependencies:
   - bioconda::bedtools
   - conda-forge::r-boot
+  - conda-forge::r-base
   - conda-forge::r-data.table
   - conda-forge::r-devtools
   - conda-forge::r-gridextra
