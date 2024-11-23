@@ -34,14 +34,26 @@ module load htslib/1.21
 
 # Define arrays for URLs, output file names, and disease names
 urls=(
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077873/harmonised/34662886-GCST90077873-EFO_0000685.h.tsv.gz"
-#    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90014001-GCST90015000/GCST90014023/harmonised/34012112-GCST90014023-EFO_0001359.h.tsv.gz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077731/harmonised/34662886-GCST90077731-EFO_1001055.h.tsv.gz"
+     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/M05.gwas.imputed_v3.both_sexes.tsv.bgz"
+#    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077873/harmonised/34662886-GCST90077873-EFO_0000685.h.tsv.gz"
+
+    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90014001-GCST90015000/GCST90014023/harmonised/34012112-GCST90014023-EFO_0001359.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/HYPOTHYROIDISM.gwas.imputed_v3.both_sexes.tsv.bgz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077731/harmonised/34662886-GCST90077731-EFO_1001055.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/N80.gwas.imputed_v3.both_sexes.tsv.bgz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077821/harmonised/34662886-GCST90077821-EFO_0001065.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1349.gwas.imputed_v3.female.tsv.bgz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077793/harmonised/34662886-GCST90077793-HP_0000138.h.tsv.gz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
-    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1556.gwas.imputed_v3.female.tsv.bgz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
+   
     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/3581_irnt.gwas.imputed_v3.both_sexes.tsv.bgz"
+     #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
+     
     "https://storage.googleapis.com/finngen-public-data-r6/summary_stats/finngen_R6_ATOPIC_STRICT.gz"
 )
 
@@ -51,7 +63,7 @@ output_dir="output/gwas_ss_filt"
 # Add corresponding output files here
 output_files=(
               "$data_dir/ra_uk_bb.h.tsv"
-#              "$data_dir/t1d_uk_bb.h.tsv"
+              "$data_dir/t1d_uk_bb.h.tsv"
               "$data_dir/hypo_uk_bb.h.tsv"
               "$data_dir/endo_uk_bb.h.tsv"
               "$data_dir/ovary_cys_uk_bb.h.tsv"
@@ -64,7 +76,7 @@ output_files=(
  # Add corresponding disease names here                  
 disease_names=(
               "Rheumatoid Arthritis"
-#              "Type 1 Diabetes"
+              "Type 1 Diabetes"
               "Hypothyroidism"
               "Endometriosis"
               "Ovary Cysts"
@@ -88,11 +100,11 @@ for i in "${!urls[@]}"; do
     echo " "
 
     if [ ! -f "${output_file}.gz" ]; then
-        wget -nc -O "${output_file}.gz" "$url"
+        wget -nc -c -q -O "${output_file}.gz" "$url"
     
-       if [[ "$output_file" == *"age_meno"* &&  ! -f "${output_file}.bgz" ]]; then
+       if [[ "$url" == *"broad"* &&  ! -f "${output_file}.bgz" ]]; then
            echo "Downloading data for ${disease_name}..."
-           wget -nc -O "${output_file}.bgz" "$url"
+           wget -nc -c -q -O "${output_file}.bgz" "$url"
        fi
     fi
     
@@ -100,7 +112,7 @@ for i in "${!urls[@]}"; do
        echo " "
        echo " "
        echo "Unzip data for ${disease_name}..."
-       if [[ "$output_file" == *"age_meno"* ]]; then
+       if [[ "$url" == *"broad"* ]]; then
        bgzip -d "${output_file}.bgz"
        else
        gunzip "${output_file}.gz"
@@ -119,7 +131,7 @@ for i in "${!urls[@]}"; do
     echo " "
     
     if [[ "$output_file" == *"uk"* ]]; then
-        if [[ "$output_file" == *"age_meno"* ]]; then #menopause files have a different file structure
+        if [[ "$output_file" == *"broad"* ]]; then #files from broad have different structure
             awk ' NR == 1 || $1 ~ /^6/ || $1 ~ /^4/  || $1 ~ /^11/ ' "$output_file" > "$filt_file"
 
             #awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
