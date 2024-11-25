@@ -65,3 +65,4 @@ output/*
 *.nonsyn
 *.gz
 *.pyc
+**.ipynb_checkpoints/
