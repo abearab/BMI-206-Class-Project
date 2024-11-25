@@ -32,13 +32,19 @@ make_plot_data = function(data_filename,
     pos_col <- "pos"
     rsid_col <- "rsids"
     
+  } else if (grepl("age_meno", data_filename)){
+    
+    rsid_col <- NULL
+    pval_col <- "pval"
+    chrom_col <- "chrom"
+    pos_col <- "pos"
+    
   } else {
     
     chrom_col <- "chromosome"
     pval_col <- "p_value"
     pos_col <- "base_pair_location"
     rsid_col <- "rsid"
-    
   }
   
   data = data.table::fread(data_filename, 

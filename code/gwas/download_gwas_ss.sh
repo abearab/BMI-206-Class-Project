@@ -24,18 +24,36 @@
 # The maximum running time of the job in hours:mins:sec (converted to 10 minutes):
 #$ -l h_rt=0:20:00
 
+module load CBI 
+#module load miniforge3/24.7.1-0
+#conda activate bmi-206-group
+module load htslib/1.21
+
 # Download relevant gwas summary statistics
+
 
 # Define arrays for URLs, output file names, and disease names
 urls=(
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077873/harmonised/34662886-GCST90077873-EFO_0000685.h.tsv.gz"
+     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/M05.gwas.imputed_v3.both_sexes.tsv.bgz"
+#    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077873/harmonised/34662886-GCST90077873-EFO_0000685.h.tsv.gz"
+
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90014001-GCST90015000/GCST90014023/harmonised/34012112-GCST90014023-EFO_0001359.h.tsv.gz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077731/harmonised/34662886-GCST90077731-EFO_1001055.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/HYPOTHYROIDISM.gwas.imputed_v3.both_sexes.tsv.bgz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077731/harmonised/34662886-GCST90077731-EFO_1001055.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/N80.gwas.imputed_v3.both_sexes.tsv.bgz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077821/harmonised/34662886-GCST90077821-EFO_0001065.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1349.gwas.imputed_v3.female.tsv.bgz"
     "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077793/harmonised/34662886-GCST90077793-HP_0000138.h.tsv.gz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
-    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
+    
+    "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1556.gwas.imputed_v3.female.tsv.bgz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
+   
     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/3581_irnt.gwas.imputed_v3.both_sexes.tsv.bgz"
+     #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90079001-GCST90080000/GCST90079064/harmonised/GCST90079064.h.tsv.gz"
+     
     "https://storage.googleapis.com/finngen-public-data-r6/summary_stats/finngen_R6_ATOPIC_STRICT.gz"
 )
 
@@ -75,12 +93,30 @@ for i in "${!urls[@]}"; do
 
     # Download and unzip the data
     echo " "
+    echo "Now processing summary statistics for ${disease_name}"
+    echo "output_file: ${output_file}"
+    echo "url: ${output_file}"
     echo " "
-    echo "Downloading data for ${disease_name}..."
-    wget -nc -O "${output_file}.gz" "$url"
+    echo " "
+
+    if [ ! -f "${output_file}.gz" ]; then
+        wget -nc -c -q -O "${output_file}.gz" "$url"
+    
+       if [[ "$url" == *"broad"* &&  ! -f "${output_file}.bgz" ]]; then
+           echo "Downloading data for ${disease_name}..."
+           wget -nc -c -q -O "${output_file}.bgz" "$url"
+       fi
+    fi
     
     if [ ! -f "$output_file" ]; then
+       echo " "
+       echo " "
+       echo "Unzip data for ${disease_name}..."
+       if [[ "$url" == *"broad"* ]]; then
+       bgzip -d "${output_file}.bgz"
+       else
        gunzip "${output_file}.gz"
+       fi
     fi
     
     filt_file="$(echo "$output_file" | sed "s|^$data_dir|$output_dir|" | sed 's|\.tsv$|.filt.tsv|')"
@@ -95,8 +131,10 @@ for i in "${!urls[@]}"; do
     echo " "
     
     if [[ "$output_file" == *"uk"* ]]; then
-        if [[ "$output_file" == *"age_meno"* ]]; then #menopause files have a different file structure
-            awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
+        if [[ "$output_file" == *"broad"* ]]; then #files from broad have different structure
+            awk ' NR == 1 || $1 ~ /^6/ || $1 ~ /^4/  || $1 ~ /^11/ ' "$output_file" > "$filt_file"
+
+            #awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
         else 
         # Filtering and counting based on chromosome and position for "ukbb" files
             awk -F'\t' 'NR == 1 || $3 == 6 || $3 == 4 || $3 == 11' "$output_file" > "$filt_file"
@@ -104,14 +142,14 @@ for i in "${!urls[@]}"; do
         fi
         
         # Print statistics
-        echo "${disease_name} number of sites tested for chromosome 6"
-        awk -F'\t' 'NR == 1 || $3 == 6' "$filt_file" | wc -l
+        echo "${disease_name} number of sites tested for chromosome 4, 6, 11 "
+        "$filt_file" | wc -l
 
-        echo "${disease_name} number of sites for chromosome 4"
-        awk -F'\t' 'NR == 1 || $3 == 4' "$filt_file" | wc -l
-
-        echo "${disease_name} number of sites for chromosome 11"
-        awk -F'\t' 'NR == 1 || $3 == 11' "$filt_file" | wc -l
+        # echo "${disease_name} number of sites for chromosome 4"
+        # awk -F'\t' 'NR == 1 || $3 == 4' "$filt_file" | wc -l
+        # 
+        # echo "${disease_name} number of sites for chromosome 11"
+        # awk -F'\t' 'NR == 1 || $3 == 11' "$filt_file" | wc -l
         
     elif [[ "$output_file" == *"finngen"* ]]; then
     
@@ -119,14 +157,16 @@ for i in "${!urls[@]}"; do
         awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
         
         # Print statistics
-        echo "${disease_name} number of sites tested for chromosome 6"
-        awk -F'\t' 'NR == 1 || $1 == 6' "$filt_file" | wc -l
-
-        echo "${disease_name} number of sites for chromosome 4"
-        awk -F'\t' 'NR == 1 || $1 == 4' "$filt_file" | wc -l
-
-        echo "${disease_name} number of sites for chromosome 11"
-        awk -F'\t' 'NR == 1 || $1 == 11' "$filt_file" | wc -l
+        echo "${disease_name} number of sites tested for chromosome 4, 6, 11 "
+        "$filt_file" | wc -l
+        # echo "${disease_name} number of sites tested for chromosome 6"
+        # awk -F'\t' 'NR == 1 || $1 == 6' "$filt_file" | wc -l
+        # 
+        # echo "${disease_name} number of sites for chromosome 4"
+        # awk -F'\t' 'NR == 1 || $1 == 4' "$filt_file" | wc -l
+        # 
+        # echo "${disease_name} number of sites for chromosome 11"
+        # awk -F'\t' 'NR == 1 || $1 == 11' "$filt_file" | wc -l
     fi  
 
     echo "Processing complete for ${disease_name}."

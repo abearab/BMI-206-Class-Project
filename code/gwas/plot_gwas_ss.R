@@ -118,8 +118,6 @@ for(data_filename in fig_4a_data){
   breaks_lab = c("90.2", "", "90.3", "")
   plot_region_left = 90.2 - 0.5 * 0.75
   plot_region_right = 90.35 + 0.5 * 0.25
-  top_rsid = "rs181077215" # test snp
-  top_rsid = "rs149259946"
 
   # data = make_plot_data(data_filename = data_filename,
   #                       plot_chrom = 6,
@@ -128,15 +126,15 @@ for(data_filename in fig_4a_data){
   #                      top_rsid = top_rsid
   #                       )
   # 
+  data = data.table::fread(data_filename)
+  
   plot_gg_manhattan(data, 
-                    data_filename = data_filename, 
+                    data_filename = data_filename,
                     plot_region_left = plot_region_left,
                     plot_region_right = plot_region_right,
-                    top_rsid = top_rsid,
                     breaks = breaks,
-                    breaks_lab = breaks_lab
-                    
-                    )
+                    breaks_lab = breaks_lab,
+                    top_rsid = top_rsid)
 
 } 
 
@@ -152,18 +150,21 @@ fig_4b_data=c("output/gwas_plotting_data/ra_uk_bb.h.filt.fig4b.tsv",
 
 for(data_filename in fig_4b_data){
   
-  
+  plot_region_left = 26.05 - 0.05 * 0.75
+  plot_region_right = 26.150 + 0.05* 0.25
+  breaks = c(26.05, 26.10, 26.15)
+  breaks_lab = c("26.05", "26.10", "26.15")
   top_rsid = "rs35944082"
+  top_rsid = "unlabelled"
   
-  data = make_plot_data(data_filename = data_filename,
-                        plot_chrom = 4,
-                        plot_region_left = 26,
-                        plot_region_right = 26.20,
-                        top_rsid = top_rsid)
-  
+  data = data.table::fread(data_filename)
   
   plot_gg_manhattan(data, 
                     data_filename = data_filename,
+                    plot_region_left = plot_region_left,
+                    plot_region_right = plot_region_right,
+                    breaks = breaks,
+                    breaks_lab = breaks_lab,
                     top_rsid = top_rsid)
   
 } 
@@ -184,16 +185,25 @@ fig_4c_data=c("output/gwas_plotting_data/endo_uk_bb.h.filt.fig4c.tsv",
 for(data_filename in fig_4c_data){
   
   top_rsid = "rs11031006"
-  
-  data = make_plot_data(data_filename = data_filename,
-                        plot_chrom = 11,
-                        plot_region_left = 29.9,
-                        plot_region_right = 30.4,
-                        top_rsid = top_rsid)
-  
+  top_rsid = "unlabelled"
+  breaks = c(30.0, 30.1, 30.2, 30.3, 30.4)
+  breaks_lab = c("30.0", " ", "30.2", "", "30.4")
+  plot_region_left = 30.0 - 0.5 * 0.1 
+  plot_region_right = 30.4 + 0.5 * 0.1 
+  # data = make_plot_data(data_filename = data_filename,
+  #                       plot_chrom = 11,
+  #                       plot_region_left = 29.9,
+  #                       plot_region_right = 30.4,
+  #                       top_rsid = top_rsid)
+  # 
+  data = data.table::fread(data_filename)
   
   plot_gg_manhattan(data, 
                     data_filename = data_filename,
+                    plot_region_left = plot_region_left,
+                    plot_region_right = plot_region_right,
+                    breaks = breaks,
+                    breaks_lab = breaks_lab,
                     top_rsid = top_rsid)
   
 } 
