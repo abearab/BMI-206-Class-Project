@@ -64,3 +64,5 @@ output/*
 .DS_Store
 *.nonsyn
 *.gz
+*.pyc
+**.ipynb_checkpoints/
