@@ -1,0 +1,30 @@
+name: bmi-206-group
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - bioconda::bedtools
+  - conda-forge::r-boot
+  - conda-forge::r-base
+  - conda-forge::r-data.table
+  - conda-forge::r-devtools
+  - conda-forge::r-gridextra
+  - conda-forge::r-hmisc
+  - conda-forge::r-irkernel
+  - conda-forge::r-lme4
+  - conda-forge::r-mass
+  - conda-forge::r-matrix
+  - conda-forge::r-r.utils
+  - conda-forge::r-stringr
+  - conda-forge::r-tidyverse
+  - conda-forge::r-seurat
+  - bioconda::bioconductor-singlecellexperiment
+  - bioconda::bioconductor-rsamtools
+  - bioconda::r-anndata
+  - conda-forge::scanpy
+  - conda-forge::gsutil
+  - conda-forge::ipykernel
+  - pip
+  - pip:
+    - venn
+    - rpy2

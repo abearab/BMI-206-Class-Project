@@ -53,8 +53,14 @@ rsconnect/
 
 # data files
 output/*
+*.h5ad
+*.bed
+*.xlsx
+*.sqlite
 *.vcf
 *.bcf
 *.samples
 *.tsv
 .DS_Store
+*.nonsyn
+*.gz
