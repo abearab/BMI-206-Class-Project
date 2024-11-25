@@ -64,3 +64,4 @@ output/*
 .DS_Store
 *.nonsyn
 *.gz
+*.pyc
