@@ -1,15 +1,5 @@
-#! /usr/bin/env bash
-#$ -S /bin/bash
-#$ -cwd
-
-
-
-module load CBI
-module load miniforge3/24.7.1-0
-module load r/4.4.2
-conda activate bmi-206-group
-#conda install conda-forge::gsutil
-
+#conda activate bmi-206-group
+mkdir -p output/fine_map
 
 ########### Part 1: Determine: what finngen files to dowload ##################
 
@@ -39,6 +29,7 @@ fi
         
   
 # we overlap them while doing filtering step 1: filter for traits with cases > 1,000         
+Rscript -e '
 Rscript -e '
 
 R6_all = data.table::fread("data/fine_map/R6_manifest.tsv");
@@ -129,18 +120,12 @@ echo " "
 echo " "
 
 # Create an empty list to hold filenames
-output_file="output/fine_map/all_finngen_trait_cs_filtered.tsv"
-
-> "$output_file"  # Initialize the output file (clear it if it exists)
-
-# Loop through each .snp.filter.tsv file in the folder
-
-for file in data/fine_map/*.pip0.5.nonsyn; do
-  # Check if the file has more than 1 line
-  line_count=$(wc -l < "$file")
-  
-  if [ "$line_count" -gt 1 ]; then
-      cat "$file" >> "$output"
-      echo "" >> "$output"  # Add a newline after each file for separation
-  fi
-done
+python -c """
+from glob import glob
+import pandas as pd
+pd.concat([
+  pd.read_csv(file,sep='\t',header=0) 
+  for file in glob('data/fine_map/*nonsyn')
+  if pd.read_csv(file,sep='\t',header=0).shape[0] > 0
+]).reset_index(drop=True).to_csv('output/fine_map/all_finngen_trait_cs_filtered.tsv', sep='\t', index=False)
+"""

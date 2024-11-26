@@ -54,8 +54,16 @@ rsconnect/
 # data files
 output/*
 data/*
+*.h5ad
+*.bed
+*.xlsx
+*.sqlite
 *.vcf
 *.bcf
 *.samples
 *.tsv
 .DS_Store
+*.nonsyn
+*.gz
+*.pyc
+**.ipynb_checkpoints/
