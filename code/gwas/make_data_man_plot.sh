@@ -24,5 +24,7 @@
 # The maximum running time of the job in hours:mins:sec (converted to 10 minutes):
 #$ -l h_rt=5:00:00
 
+module load CBI
+module load r/4.4.2
 
-module load R/4.4.2
+Rscript code/gwas/make_data_man_plot.R

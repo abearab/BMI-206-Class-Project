@@ -1,6 +1,6 @@
 
 {
-  library(dplyr)
+  suppressMessages(library(dplyr))
   library(LDlinkR)
   library(purrr)
 }
@@ -11,7 +11,8 @@ make_plot_data = function(data_filename,
                           plot_chrom, 
                           plot_region_left, 
                           plot_region_right, 
-                          top_rsid = "unlabelled"){
+                          top_rsid = "unlabelled",
+                          top_rsid_pos){
   
   
   message("\n Making data for ", data_filename)
@@ -48,11 +49,31 @@ make_plot_data = function(data_filename,
   }
   
   data = data.table::fread(data_filename, 
-                           select = list(factor = chrom_col,
-                                         numeric = pval_col,
+                           select = list(
+                                         character = rsid_col,            
+                                         factor = chrom_col,
                                          integer = pos_col,
-                                         character = rsid_col)
+                                         numeric = pval_col
+                                         )
   )
+  
+  if(is.null(rsid_col)){
+    
+  data = data |> 
+         tidyr::unite("rsid", 
+                      chrom_col:pos_col, 
+                      remove = F, 
+                      sep = ":",
+                      na.rm = T)
+  
+  rsid_col = "rsid"
+  
+  if(top_rsid != "unlabelled"){
+    
+    top_rsid = top_rsid_pos
+    
+  }
+  }
   
   #print(head(data))
   
@@ -95,8 +116,19 @@ make_plot_data = function(data_filename,
       dplyr::filter(rsid == top_rsid) |> 
       dplyr::pull("pos")
     
+    if(length(top_snp_pos) == 0){
+      message("snp not in dataset")
+    }
+    
+    if(length(top_snp_pos) != 0){
+    
+    #message("\n for ", length(top_snp_pos), " snps")
+    
     win_size = max(abs(plot_region_right - top_snp_pos),
                    abs(plot_region_left  - top_snp_pos))
+    
+    print(win_size)
+    
     
     high_ld = suppressMessages(
       LDlinkR::LDproxy(snp = top_rsid, 
@@ -122,7 +154,7 @@ make_plot_data = function(data_filename,
     
     
     low_ld_split <- split(low_ld, 
-                          ceiling(seq_along(low_ld) / 1000)
+                          ceiling(seq_along(low_ld) / 500)
     )
     
     low_ld_mat <- purrr::map_dfr(low_ld_split, function(chunk) {
@@ -185,6 +217,7 @@ make_plot_data = function(data_filename,
                             by = "rsid")
     
     
+    }
   }
   
   print(head(data))
@@ -196,16 +229,17 @@ make_plot_data = function(data_filename,
 
 ########### Figure 4a. ############ 
 
-fig_4a_data=c(#"output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv",
-  "output/gwas_ss_filt/t1d_uk_bb.h.filt.fig4a.tsv"#,
- # "output/gwas_ss_filt/hypo_uk_bb.h.filt.fig4a.tsv",
-#  "output/gwas_ss_filt/finngen_atopic_derm.filt.fig4a.tsv"
+fig_4a_data=c("output/gwas_hg38_preplotting/ra_uk_bb.h.filt.fig4a.tsv",
+  "output/gwas_ss_filt/t1d_uk_bb.h.filt.fig4a.tsv",
+  "output/gwas_hg38_preplotting/hypo_uk_bb.h.filt.fig4a.tsv",
+  "output/gwas_ss_filt/finngen_atopic_derm.filt.fig4a.tsv"
 )
 
 
 for(data_filename in fig_4a_data){
   
   top_rsid = "rs72928038"
+  top_rsid_pos = "6:90267049"
   top_rsid = "unlabelled"
   plot_region_left = 90.2 - 0.5 * 0.75
   plot_region_right = 90.35 + 0.5 * 0.25
@@ -214,7 +248,8 @@ for(data_filename in fig_4a_data){
                         plot_chrom = 6,
                         plot_region_left = plot_region_left,
                         plot_region_right = plot_region_right,
-                        top_rsid = top_rsid
+                        top_rsid = top_rsid,
+                        top_rsid_pos = top_rsid_pos
   )
   
   save_filename = stringr::str_replace(data_filename,
@@ -222,6 +257,9 @@ for(data_filename in fig_4a_data){
                                        replacement = "gwas_plotting_data")
   
   
+  save_filename = stringr::str_replace(data_filename,
+                                       pattern = "gwas_hg38_preplotting",
+                                       replacement = "gwas_plotting_data")  
   data.table::fwrite(data, 
                      file = save_filename)
   
@@ -233,7 +271,7 @@ for(data_filename in fig_4a_data){
 
 {
   
-  fig_4b_data=c("output/gwas_ss_filt/ra_uk_bb.h.filt.fig4b.tsv",
+  fig_4b_data=c("output/gwas_hg38_preplotting/ra_uk_bb.h.filt.fig4b.tsv",
                 "output/gwas_ss_filt/t1d_uk_bb.h.filt.fig4b.tsv"
   )
   
@@ -241,6 +279,7 @@ for(data_filename in fig_4a_data){
     
     
     top_rsid = "rs35944082"
+    top_rsid_pos = "4:26093692"
     top_rsid = "unlabelled"
     plot_region_left = 26.05 - 0.05 * 0.75
     plot_region_right = 26.150 + 0.05* 0.25
@@ -249,12 +288,16 @@ for(data_filename in fig_4a_data){
                           plot_chrom = 4,
                           plot_region_left = plot_region_left,
                           plot_region_right = plot_region_right,
-                          top_rsid = top_rsid)
+                          top_rsid = top_rsid, 
+                          top_rsid_pos = top_rsid_pos)
     
   save_filename = stringr::str_replace(data_filename,
                          pattern = "gwas_ss_filt",
                          replacement = "gwas_plotting_data")
   
+  save_filename = stringr::str_replace(data_filename,
+                                       pattern = "gwas_hg38_preplotting",
+                                       replacement = "gwas_plotting_data")
   
   data.table::fwrite(data, 
                      file = save_filename)
@@ -267,17 +310,18 @@ for(data_filename in fig_4a_data){
 
 ########### Figure 4c. ############ 
 
-{
+  {
   
-  fig_4c_data=c("output/gwas_ss_filt/endo_uk_bb.h.filt.fig4c.tsv",
-                "output/gwas_ss_filt/ovary_cys_uk_bb.h.filt.fig4c.tsv",
-                "output/gwas_ss_filt/menorrhagia_uk_bb.h.filt.fig4c.tsv",
-                "output/gwas_ss_filt/age_meno_uk_bb.h.filt.fig4c.tsv"
+  fig_4c_data=c("output/gwas_hg38_preplotting/endo_uk_bb.h.filt.fig4c.tsv",
+                "output/gwas_hg38_preplotting/ovary_cys_uk_bb.h.filt.fig4c.tsv",
+                "output/gwas_hg38_preplotting/menorrhagia_uk_bb.h.filt.fig4c.tsv",
+                "output/gwas_hg38_preplotting/age_meno_uk_bb.h.filt.fig4c.tsv"
   )
   
   for(data_filename in fig_4c_data){
     
     top_rsid = "rs11031006"
+    top_rsid_pos = "11:30204981"
     top_rsid = "unlabelled"
     plot_region_left = 30.0 - 0.5 * 0.1 
     plot_region_right = 30.4 + 0.5 * 0.1 
@@ -286,10 +330,11 @@ for(data_filename in fig_4a_data){
                           plot_chrom = 11,
                           plot_region_left = plot_region_left,
                           plot_region_right = plot_region_right,
-                          top_rsid = top_rsid)
+                          top_rsid = top_rsid,
+                          top_rsid_pos = top_rsid_pos)
 
     save_filename = stringr::str_replace(data_filename,
-                                         pattern = "gwas_ss_filt",
+                                         pattern = "gwas_hg38_preplotting",
                                          replacement = "gwas_plotting_data")
     
     

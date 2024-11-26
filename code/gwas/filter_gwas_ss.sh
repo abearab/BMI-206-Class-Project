@@ -41,7 +41,9 @@ for i in "${!fig_4a_data[@]}"; do
         }' "$gwas_sum_stat" > "${gwas_sum_stat%.tsv}.fig4a.noheader.tsv"
 
         # Filter by chromosome and position
-        awk -F'\t' '$1 == 6 && $5 >= 88000001 && $5 <= 93100000' "${gwas_sum_stat%.tsv}.fig4a.noheader.tsv" > "${gwas_sum_stat%.tsv}.fig4a.filtered.tsv"
+        # 87290283-92390282
+        #  93100001-99500000
+        awk -F'\t' '$1 == 6 && $5 >= 87290283 && $5 <= 99500000' "${gwas_sum_stat%.tsv}.fig4a.noheader.tsv" > "${gwas_sum_stat%.tsv}.fig4a.filtered.tsv"
 
         # Add header to the filtered file
         # {
@@ -98,7 +100,9 @@ for i in "${!fig_4b_data[@]}"; do
 
 # Now do figure 4 filtering
 
-   awk -F'\t' '$1 == 4 && $5 >= 1298378 && $5 <= 27698378'  "${gwas_sum_stat%.tsv}.fig4b.noheader.tsv" >  "${gwas_sum_stat%.tsv}.fig4b.tsv"
+# 21300001-27700000 hg19
+# 21296755-27696756
+   awk -F'\t' '$1 == 4 && $5 >= 21296755 && $5 <= 27700000'  "${gwas_sum_stat%.tsv}.fig4b.noheader.tsv" >  "${gwas_sum_stat%.tsv}.fig4b.tsv"
    
 #    {
 #     echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
@@ -155,8 +159,9 @@ awk -F: 'NR > 1 {
 ' "$gwas_sum_stat" > "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv"
 
 # Now do figure 4 filtering
-
-awk -F'\t' '$1 == 11 && $5 >= 27178454 && $5 <= 30978453'  "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv" >  "${gwas_sum_stat%.tsv}.fig4c.tsv"
+# hg19 27200001-31000000
+# 27178454-30978453
+awk -F'\t' '$1 == 11 && $5 >= 27200001 && $5 <= 31000000'  "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv" >  "${gwas_sum_stat%.tsv}.fig4c.tsv"
 
 # After processing rows, add the header manually
   if [[ "$gwas_sum_stat" == *"age_meno"* ]];  then 
