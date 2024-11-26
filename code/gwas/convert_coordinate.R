@@ -1,5 +1,3 @@
-
-
 hg37_data = c('output/gwas_ss_filt/ra_uk_bb.h.filt.fig4b.tsv',
               'output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv',
               'output/gwas_ss_filt/hypo_uk_bb.h.filt.fig4a.tsv',
@@ -8,33 +6,45 @@ hg37_data = c('output/gwas_ss_filt/ra_uk_bb.h.filt.fig4b.tsv',
               'output/gwas_ss_filt/menorrhagia_uk_bb.h.filt.fig4c.tsv',
               'output/gwas_ss_filt/age_meno_uk_bb.h.filt.fig4c.tsv')
 
-for(data_filename in hg37_data){
+# # Ensure output directory exists
+# if (!dir.exists("output/gwas_hg37")) {
+#   dir.create("output/gwas_hg37", recursive = TRUE)
+# }
 
-df = data.table::fread(data_filename)
+for (data_filename in hg37_data) {
+  print(data_filename)
+  
+  # Read the data
+  df = data.table::fread(data_filename)
+  
+  #Transform the data
+  df = df |>
+    dplyr::mutate(chrom = paste0("chr", chrom),
+                  end = pos) |>
+    dplyr::select(chrom, pos, end, pval)
+  
+  df = df |> 
+       dplyr::filter(!is.na(pval))
 
-df = df |> 
-     dplyr::mutate(chrom = paste0("chr", chrom))
+  # Generate the save filename
+  save_filename = stringr::str_replace(
+    data_filename,
+    pattern = "gwas_ss_filt",
+    replacement = "gwas_hg37"
+  )
 
-# df = df |> 
-#      dplyr::mutate(pos = 10^6 * pos)
+  print("saving as ...")
+  print(save_filename)
 
-df = df |> 
-      dplyr::mutate(end = pos)
-
-df = df |> 
-     dplyr::select(chrom, pos, end, pval)
-
-save_filename = stringr::str_replace(data_filename,
-                                     pattern = "gwas_ss_filt",
-                                     replacement = "gwas_hg37")
-
-data.table::fwrite(df, 
-                   file = save_filename,
-                   sep= "\t", 
-                   col.names = F
-    )
-
+  # Write the transformed data
+  data.table::fwrite(
+    df,
+    file = save_filename,
+    sep = "\t",
+    col.names = FALSE
+  )
 }
+
 
 # use the ucsc liftover
 

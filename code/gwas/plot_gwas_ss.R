@@ -100,10 +100,10 @@ plot_gg_manhattan = function(data,
 ################ Figure 4a. ############# 
 {
 
-fig_4a_data=c(#"output/gwas_plotting_data/ra_uk_bb.h.filt.fig4a.tsv",
-             "output/gwas_plotting_data/t1d_uk_bb.h.filt.fig4a.tsv"
-              #"output/gwas_plotting_data/hypo_uk_bb.h.filt.fig4a.tsv",
-             #"output/gwas_plotting_data/finngen_atopic_derm.filt.fig4a.tsv"
+fig_4a_data=c("output/gwas_plotting_data/ra_uk_bb.h.filt.fig4a.tsv",
+             "output/gwas_plotting_data/t1d_uk_bb.h.filt.fig4a.tsv",
+              "output/gwas_plotting_data/hypo_uk_bb.h.filt.fig4a.tsv",
+             "output/gwas_plotting_data/finngen_atopic_derm.filt.fig4a.tsv"
              )
 
 #fig_4a_data = "output/gwas_plotting_data/finngen_atopic_derm.filt.tsv"
