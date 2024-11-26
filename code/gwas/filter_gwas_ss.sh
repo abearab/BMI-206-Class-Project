@@ -17,22 +17,47 @@ fig_4a_data=("$output_dir/ra_uk_bb.h.filt.tsv"
              )
 
 echo "Filtering Figure 4a datasets"
+
 for i in "${!fig_4a_data[@]}"; do
     gwas_sum_stat="${fig_4a_data[$i]}"
 
     echo " "
     echo "$gwas_sum_stat"
 
-    if [[ "$gwas_sum_stat" == *"uk"* ]]; then
-
-        awk -F'\t' 'NR == 1 || $3 == 6 && $4 >= 88000001 && $4 <= 93100000' "$gwas_sum_stat" >  "${gwas_sum_stat%.tsv}.fig4a.tsv"
+    if [[ "$gwas_sum_stat" == *"t1d"* ]]; then
+        awk -F'\t' 'NR == 1 || ($3 == 6 && $4 >= 88000001 && $4 <= 93100000)' "$gwas_sum_stat" > "${gwas_sum_stat%.tsv}.fig4a.tsv"
 
     elif [[ "$gwas_sum_stat" == *"finngen"* ]]; then
+        awk -F'\t' 'NR == 1 || ($1 == 6 && $2 >= 88000001 && $2 <= 93100000)' "$gwas_sum_stat" > "${gwas_sum_stat%.tsv}.fig4a.tsv"
 
-        awk -F'\t' 'NR == 1 || $1 == 6 && $2 >= 88000001 && $2 <= 93100000' "$gwas_sum_stat" >  "${gwas_sum_stat%.tsv}.fig4a.tsv"
+    elif [[ "$gwas_sum_stat" == *"hypo"* || "$gwas_sum_stat" == *"ra"* ]]; then
+        # Preprocess and create the no-header file
+        awk -F':' '
+        NR > 1 {
+            split($1, fields, ":");
+            printf "%s\t%s\t%s\t%s", fields[1], fields[2], fields[3], fields[4];
+            for (i = 2; i <= NF; i++) printf "\t%s", $i;
+            print "";
+        }' "$gwas_sum_stat" > "${gwas_sum_stat%.tsv}.fig4a.noheader.tsv"
 
+        # Filter by chromosome and position
+        awk -F'\t' '$1 == 6 && $5 >= 88000001 && $5 <= 93100000' "${gwas_sum_stat%.tsv}.fig4a.noheader.tsv" > "${gwas_sum_stat%.tsv}.fig4a.filtered.tsv"
+
+        # Add header to the filtered file
+        # {
+        #     echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+        #     cat "${gwas_sum_stat%.tsv}.fig4a.filtered.tsv";
+        # } > "${gwas_sum_stat%.tsv}.fig4a.tsv"
+        
+        {
+             echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\texpected_case_minor_AC\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+             cat "${gwas_sum_stat%.tsv}.fig4a.noheader.tsv";
+        } > "${gwas_sum_stat%.tsv}.fig4a.tsv"
+
+        
     fi
 done
+
 
 
 
@@ -55,9 +80,42 @@ for i in "${!fig_4b_data[@]}"; do
 
     echo " "
     echo "$gwas_sum_stat"
+     if [[ "$gwas_sum_stat" == *"ra"* ]]; then
+     
+    awk -F: 'NR > 1 {
+    # Split the first column into chrom, pos, ref, alt
+    split($1, fields, ":");
+    # Print the new columns (chrom, pos, ref, alt) followed by the remaining columns starting from $2
+    # We will ensure that there are no extra spaces between columns by using printf correctly
+    printf "%s\t%s\t%s\t%s", fields[1], fields[2], fields[3], fields[4];
+    # Print the rest of the columns starting from $2
+    for (i=2; i<=NF; i++) {
+        printf "\t%s", $i;  # Ensures that each field is separated by a single tab
+    }
+    print "";  # Ensure a newline is printed at the end of each row
+}
+' "$gwas_sum_stat" > "${gwas_sum_stat%.tsv}.fig4b.noheader.tsv"
+
+# Now do figure 4 filtering
+
+   awk -F'\t' '$1 == 4 && $5 >= 1298378 && $5 <= 27698378'  "${gwas_sum_stat%.tsv}.fig4b.noheader.tsv" >  "${gwas_sum_stat%.tsv}.fig4b.tsv"
+   
+#    {
+#     echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+#     cat "${gwas_sum_stat%.tsv}.fig4b.noheader.tsv";
+# } > "${gwas_sum_stat%.tsv}.fig4b.tsv"
+
+     {
+      echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\texpected_case_minor_AC\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+      cat "${gwas_sum_stat%.tsv}.fig4b.noheader.tsv";
+      } > "${gwas_sum_stat%.tsv}.fig4b.tsv"
+
+
+    else
 
     awk -F'\t' 'NR == 1 || $3 == 4 && $4 >= 21298378 && $4 <= 27698378' "$gwas_sum_stat" >  "${gwas_sum_stat%.tsv}.fig4b.tsv"
-
+    fi 
+    
 done
 
 ##################### Figure 4c ######################### 
@@ -80,7 +138,7 @@ for i in "${!fig_4c_data[@]}"; do
     echo " "
     echo "$gwas_sum_stat"
     
-    if [[ "$gwas_sum_stat" == *"age_meno"* ]]; then #menopause files have a different file structure
+    if [[ "$gwas_sum_stat" == *"uk"* ]]; then #menopause files have a different file structure
         
 awk -F: 'NR > 1 {
     # Split the first column into chrom, pos, ref, alt
@@ -101,10 +159,26 @@ awk -F: 'NR > 1 {
 awk -F'\t' '$1 == 11 && $5 >= 27178454 && $5 <= 30978453'  "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv" >  "${gwas_sum_stat%.tsv}.fig4c.tsv"
 
 # After processing rows, add the header manually
-{
-    echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
-    cat "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv";
-} > "${gwas_sum_stat%.tsv}.fig4c.tsv"
+  if [[ "$gwas_sum_stat" == *"age_meno"* ]];  then 
+     {
+       echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+       cat "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv";
+     } > "${gwas_sum_stat%.tsv}.fig4c.tsv"
+
+  else
+    {
+      echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\texpected_case_minor_AC\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+      cat "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv";
+    } > "${gwas_sum_stat%.tsv}.fig4c.tsv"
+
+  fi
+
+
+
+# {
+#     echo -e "chrom\tb1\tb2\tb3\tpos\tref\talt\tminor_allele\tminor_AF\tlow_confidence_variant\tn_complete_samples\tAC\tytx\tbeta\tse\ttstat\tpval";
+#     cat "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv";
+# } > "${gwas_sum_stat%.tsv}.fig4c.tsv"
 
 # # Clean up the temporary file# rm "${gwas_sum_stat%.tsv}.fig4c.noheader.tsv"
 

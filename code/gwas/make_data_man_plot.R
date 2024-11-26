@@ -18,7 +18,7 @@ make_plot_data = function(data_filename,
   
   
   if (grepl("uk", data_filename) && 
-      !grepl("age_meno", data_filename)) {
+      grepl("t1d", data_filename)) {
     
     chrom_col <- "hm_chrom"
     pval_col <- "p_value"
@@ -32,7 +32,7 @@ make_plot_data = function(data_filename,
     pos_col <- "pos"
     rsid_col <- "rsids"
     
-  } else if (grepl("age_meno", data_filename)){
+  } else if (grepl("uk", data_filename)){
     
     rsid_col <- NULL
     pval_col <- "pval"
@@ -206,6 +206,7 @@ fig_4a_data=c(#"output/gwas_ss_filt/ra_uk_bb.h.filt.fig4a.tsv",
 for(data_filename in fig_4a_data){
   
   top_rsid = "rs72928038"
+  top_rsid = "unlabelled"
   plot_region_left = 90.2 - 0.5 * 0.75
   plot_region_right = 90.35 + 0.5 * 0.25
   
@@ -240,6 +241,7 @@ for(data_filename in fig_4a_data){
     
     
     top_rsid = "rs35944082"
+    top_rsid = "unlabelled"
     plot_region_left = 26.05 - 0.05 * 0.75
     plot_region_right = 26.150 + 0.05* 0.25
     
@@ -276,11 +278,14 @@ for(data_filename in fig_4a_data){
   for(data_filename in fig_4c_data){
     
     top_rsid = "rs11031006"
+    top_rsid = "unlabelled"
+    plot_region_left = 30.0 - 0.5 * 0.1 
+    plot_region_right = 30.4 + 0.5 * 0.1 
     
     data = make_plot_data(data_filename = data_filename,
                           plot_chrom = 11,
-                          plot_region_left = 29.9,
-                          plot_region_right = 30.4,
+                          plot_region_left = plot_region_left,
+                          plot_region_right = plot_region_right,
                           top_rsid = top_rsid)
 
     save_filename = stringr::str_replace(data_filename,

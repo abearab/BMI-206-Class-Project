@@ -43,10 +43,10 @@ urls=(
     #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077731/harmonised/34662886-GCST90077731-EFO_1001055.h.tsv.gz"
     
     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/N80.gwas.imputed_v3.both_sexes.tsv.bgz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077821/harmonised/34662886-GCST90077821-EFO_0001065.h.tsv.gz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077821/harmonised/34662886-GCST90077821-EFO_0001065.h.tsv.gz"
     
     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1349.gwas.imputed_v3.female.tsv.bgz"
-    "ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077793/harmonised/34662886-GCST90077793-HP_0000138.h.tsv.gz"
+    #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077793/harmonised/34662886-GCST90077793-HP_0000138.h.tsv.gz"
     
     "https://broad-ukb-sumstats-us-east-1.s3.amazonaws.com/round2/additive-tsvs/20002_1556.gwas.imputed_v3.female.tsv.bgz"
     #"ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90077001-GCST90078000/GCST90077933/harmonised/34662886-GCST90077933-HP_0000132.h.tsv.gz"
@@ -95,29 +95,36 @@ for i in "${!urls[@]}"; do
     echo " "
     echo "Now processing summary statistics for ${disease_name}"
     echo "output_file: ${output_file}"
-    echo "url: ${output_file}"
+    echo "url: ${url}"
     echo " "
     echo " "
 
-    if [ ! -f "${output_file}.gz" ]; then
-        wget -nc -c -q -O "${output_file}.gz" "$url"
-    
-       if [[ "$url" == *"broad"* &&  ! -f "${output_file}.bgz" ]]; then
-           echo "Downloading data for ${disease_name}..."
-           wget -nc -c -q -O "${output_file}.bgz" "$url"
-       fi
-    fi
-    
-    if [ ! -f "$output_file" ]; then
-       echo " "
-       echo " "
-       echo "Unzip data for ${disease_name}..."
-       if [[ "$url" == *"broad"* ]]; then
-       bgzip -d "${output_file}.bgz"
-       else
-       gunzip "${output_file}.gz"
-       fi
-    fi
+    # if [[ ! -f "${output_file}.gz" && "${url}" != *"broad"* ]]; then
+    #     echo "Downloading data for ${disease_name}..."
+    #     curl -C - -s --fail -o "${output_file}.gz" "${url}"
+    # fi
+    # 
+    # if [[ "${url}" == *"broad"* && ! -f "${output_file}.bgz" ]]; then
+    #     echo "Downloading data for ${disease_name}..."
+    #     curl -C - -s --fail -o "${output_file}.bgz" "${url}"
+    # fi
+    # 
+    # if [ ! -f "$output_file" ]; then
+    #    echo " "
+    #    echo " "
+    # 
+    #    if [[ -f "${output_file}.bgz" ]]; then
+    #       echo "Unzipping ${output_file}.bgz datafile for ${disease_name}..."
+    #       bgzip -d "${output_file}.bgz"
+    # 
+    #    elif [[ -f "${output_file}.gz" ]]; then
+    #      echo "Unzipping ${output_file}.gz datafile for ${disease_name}..."
+    #      gunzip "${output_file}.gz"
+    #      
+    #    fi
+    #    
+    # fi
+
     
     filt_file="$(echo "$output_file" | sed "s|^$data_dir|$output_dir|" | sed 's|\.tsv$|.filt.tsv|')"
     
@@ -131,7 +138,7 @@ for i in "${!urls[@]}"; do
     echo " "
     
     if [[ "$output_file" == *"uk"* ]]; then
-        if [[ "$output_file" == *"broad"* ]]; then #files from broad have different structure
+        if [[ "$url" == *"broad"* ]]; then #files from broad have different structure
             awk ' NR == 1 || $1 ~ /^6/ || $1 ~ /^4/  || $1 ~ /^11/ ' "$output_file" > "$filt_file"
 
             #awk -F'\t' 'NR == 1 || $1 == 6 || $1 == 4 || $1 == 11' "$output_file" > "$filt_file"
