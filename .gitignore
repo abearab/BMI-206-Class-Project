@@ -53,6 +53,7 @@ rsconnect/
 
 # data files
 output/*
+data/*
 *.vcf
 *.bcf
 *.samples
