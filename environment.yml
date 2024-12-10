@@ -20,6 +20,9 @@ dependencies:
   - conda-forge::r-seurat
   - bioconda::bioconductor-singlecellexperiment
   - bioconda::bioconductor-rsamtools
+  - bioconda::bioconductor-ensdb.hsapiens.v86
+  - bioconda::bioconductor-bsgenome.hsapiens.ucsc.hg38
+  - bioconda::bioconductor-biovizbase
   - bioconda::r-anndata
   - conda-forge::scanpy
   - conda-forge::gsutil
